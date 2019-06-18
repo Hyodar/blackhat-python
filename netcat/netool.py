@@ -13,11 +13,11 @@ setparser()
 def setparser():
         parser = argparse.ArgumentParser(description='Netool')
 
-        parser.add_argument('-l', '--listen',
+        parser.add_argument('-l', '--listen', action='store_true',
                             help='listen on [host]:[port] for incoming connections')
         parser.add_argument('-e', '--execute',
                             help='execute the given file upon connection')
-        parser.add_argument('-c', '--command',
+        parser.add_argument('-c', '--command', action='store_true',
                             help='initialize a command shell')
         parser.add_argument('-u', '--upload_dest',
                             help='upon receiving connection, upload a file and write to [destination]')
@@ -30,9 +30,6 @@ def setparser():
 
         return parser
 
-# Inicializando o parser
-state = setparser()
-
 # ---------------------------------------------------------------------------
 
 """
@@ -44,21 +41,23 @@ def client_sender(buffer):
 
     global state
 
-    client = socket.Socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        client.connect((state.target, state.port))
+            
+        client_socket.connect((state.target, state.port))
 
         if buffer:
-            client.send(buffer)
+            client_socket.send(buffer)
 
         while True:
-
+            
             recv_len = 1
             resp = ''
 
             while recv_len:
-                data = client.recv(4096)
+
+                data = client_socket.recv(4096).decode('utf-8')
                 recv_len = len(data)
 
                 resp += data
@@ -69,13 +68,13 @@ def client_sender(buffer):
             print(resp)
 
             buffer = input('>')+'\n'
-            client.send(buffer)
+            client_socket.send(buffer.encode('utf-8'))
 
     except Exception as e:
         print("[!] Exception! Exiting...")
         print("[!] Error details: {}".format(e))
 
-        client.close()
+        client_socket.close()
 
 # ---------------------------------------------------------------------------
 
@@ -88,7 +87,7 @@ def server_loop():
 
     global state
 
-    server = socket.Socket(socket.AF_INET, socket.SOCK_STREAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((state.target, state.port))
 
     server.listen(5)
@@ -113,13 +112,13 @@ def run_command(comm):
     global state
 
     comm = comm.rstrip()
-
+    
     try:
         output = subprocess.check_output(comm,
                                          stderr=subprocess.STDOUT,
                                          shell=True)
     except:
-        output = 'Failed to execute command.\r\n'
+        output = 'Failed to execute command.\r\n'.encode('utf-8')
 
     return output
     
@@ -140,7 +139,7 @@ def client_handler(client_socket):
         file_buf = ''
 
         while True:
-            data = client_socket.recv(1024)
+            data = client_socket.recv(1024).decode('utf-8')
 
             if not data:
                 break
@@ -159,26 +158,29 @@ def client_handler(client_socket):
         output = run_command(state.execute)
         client_socket.send(output)
 
-    if state.command:
-
+    if state.command:    
+        
         while True:
-            client.send('<Netool:#> ')
+            client_socket.send('Netool:$ '.encode('utf-8'))
             cmd_buf = ''
 
             while '\n' not in cmd_buf:
-                cmd_buf += client_socket.recv(1024)
+                cmd_buf += client_socket.recv(1024).decode('utf-8')
 
-            resp = run_command(cmd_buff)
+            resp = run_command(cmd_buf)
             client_socket.send(resp)
 # ---------------------------------------------------------------------------
-  
-def main():
 
+
+# Inicializando o parser
+parser = setparser()
+state = parser.parse_args()
+
+def main():
     global state
-    state.parse_args()
 
     buffer = sys.stdin.read()
-    client_sender(buffer)
+    client_sender(buffer.encode('utf-8'))
 
     if state.listen:
         server_loop()
