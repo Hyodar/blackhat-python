@@ -44,19 +44,16 @@ def client_sender(buffer):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-            
         client_socket.connect((state.target, state.port))
 
         if buffer:
             client_socket.send(buffer)
 
         while True:
-            
             recv_len = 1
             resp = ''
 
             while recv_len:
-
                 data = client_socket.recv(4096).decode('utf-8')
                 recv_len = len(data)
 
@@ -64,7 +61,7 @@ def client_sender(buffer):
 
                 if recv_len < 4096:
                     break
-
+                
             print(resp)
 
             buffer = input('>')+'\n'
@@ -135,7 +132,7 @@ def client_handler(client_socket):
     global state
 
     if state.upload_dest:
-
+            
         file_buf = ''
 
         while True:
