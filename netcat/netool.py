@@ -108,10 +108,8 @@ def run_command(comm):
 
     global state
 
-    comm = comm.rstrip()
-    
     try:
-        output = subprocess.check_output(comm,
+        output = subprocess.check_output(comm.rstrip(),
                                          stderr=subprocess.STDOUT,
                                          shell=True)
     except:
