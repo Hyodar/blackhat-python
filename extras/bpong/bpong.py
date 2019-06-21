@@ -29,43 +29,40 @@ stored_scan = {
 # Classes
 # -----------------------------------------------------------------------------
 
-class Command:
+class CommandParser:
 
-    def __init__(self, name, aliases, on_call, help):
-        self.name = name
-        self.aliases = aliases
-        self.on_call = on_call
-        self.help = help
+    def __init__(self, description):
+        self.description = description
+        self.commands = []
+        
+        self.add_command(name='exit', aliases=['quit', 'q', 'e'], on_call=exit,
+                         help='Exits the script')
+        self.add_command(name='help', aliases=['h'], on_call=self.help,
+                         help='Prints help info')
+
+    def add_command(self, name, aliases, on_call, help):
+        self.commands.append({
+            'name': name,
+            'aliases': aliases,
+            'on_call': on_call,
+            'help': help
+        })
     
-    def run(self):
-        self.on_call()
-    
-    def parse(self, comm):
-        if comm == self.name or comm in self.aliases:
-            self.run()
-            return 1
-        return 0
+    def help(self):
+        print("\n-------------------------------")
+        print(self.description)
+        for command in self.commands:
+            print("\t{}: {}".format(command['name'], command['help']))
+        print("-------------------------------\n")
+
+    def parse(self, comm_input):
+        for comm in self.commands:
+            if comm_input == comm['name'] or comm_input in comm['aliases']:
+                comm['on_call']()
+                return
+        print("[!] The command '{}' does not exist.".format(comm_input))
 
 # Functions
-# -----------------------------------------------------------------------------
-
-"""
-help_message()
-    Prints a help message about the commands
-"""
-
-def help_message():
-
-    print("Bpong v0.1")
-    print("Commands:")
-    print("\tscan -> Scans for nearby devices")
-    print("\trun -> Runs the attack")
-    print("\tchg -> Changes the target based on the last scan")
-    print("\tset [param] [value] -> Sets parameters (interface, packet_sz,\
-          name, bdaddr")
-    print("\tsettings -> Prints current settings")
-    print("\texit -> Quits the script")
-
 # -----------------------------------------------------------------------------
 
 """
@@ -168,54 +165,44 @@ set_params(comm)
     Runs the attack with the parameters set on 'scan' or 'set'
 """
 
-def set_params(comm):
-    comm = comm.split(' ')    
-    params[comm[2]] = comm[3]
+def set_params():
+    print('[*] Parameters: bdaddr, name, packet_sz, interface')
+    param, value = input("[*] Insert '<param> <value>':").split(' ')
+    params[param] = value
 
 # -----------------------------------------------------------------------------
 
 """
-parse_comm(comm)
-    Parameters: - str comm: Inserted command
-        
-    Parses the inserted command to run each function and get additional info
+config_parser()
+    Adds all the commands to a command parser
 """
 
-def parse_comm(comm):
-    if not comm:
-        print("[!] Insert a command")
+def config_parser():
+    parser = CommandParser(description='Bpong v0.1')
+    
+    parser.add_command(name='scan', aliases=['s'], on_call=scan,
+                       help='Scans for nearby devices and configs the attack')
+    parser.add_command(name='run', aliases=['flood', 'ping', 'r'], on_call=run,
+                       help='Runs the attack')
+    parser.add_command(name='chg', aliases=['new'], on_call=change_target,
+                       help='Changes the target to one of the stored ones')
+    parser.add_command(name='settings', aliases=[], on_call=settings_report,
+                       help='Prints a report with the current config')
+    parser.add_command(name='set', aliases=[], on_call=set_params,
+                       help='Sets parameters values manually')
 
-    if comm in ['scan', 's']:
-        scan()
-    elif comm in ['run', 'flood', 'ping', 'r']:
-        run()
-    elif comm in ['chg', 'new']:
-        change_target()
-    elif comm.startswith('set'):
-        set_params(comm)
-    elif comm in ['commands', 'help']:
-        print("[*] scan, run, set [] [], settings, exit")
-    elif comm == 'settings':
-        settings_report()
-    elif comm in ['exit', 'e', 'quit', 'q']:
-        exit()
-    else:
-        print("[!] The command {} does not exist".format(comm))
+    return parser
 
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 
 def main():
-
-    commands = []
-
-    commands.append(Command(name='scan', aliases['s'], on_call=scan,
-                    help = 'scans for nearby devices'))
+    parser = config_parser()
 
     while True:
-        comm = input('<bpong> ')
-        parse_comm(comm)
+        comm = input('bpong > ')
+        parser.parse(comm)
 
 if __name__ == '__main__':
     main()
