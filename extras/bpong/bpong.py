@@ -201,7 +201,7 @@ def main():
     parser = config_parser()
 
     while True:
-        comm = input('bpong > ')
+        comm = input('bpong> ')
         parser.parse(comm)
 
 if __name__ == '__main__':
