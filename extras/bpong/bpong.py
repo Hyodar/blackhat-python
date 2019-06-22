@@ -1,11 +1,14 @@
 
-# Bpong - Bluetooth Ping Flood Utility v0.1
+# Bpong - Bluetooth Ping Flooding Utility v0.1
 # Author: Franco Barpp Gomes (https://github.com/Hyodar)
 
 # -*- coding: utf-8 -*-
 
 # Imported modules
 # -----------------------------------------------------------------------------
+
+# If you're getting any errors, install the packages
+# libbluetooth and python3-dev with your package manager
 
 import bluetooth as bt
 import subprocess
@@ -71,10 +74,14 @@ choose_target()
 """
 
 def choose_target():
+    if not stored_scan['bdaddrs']:
+        print("[!] No nearby devices found! Try again.")
+        return 0
 
     target = int(input('[*] Choose target: '))
     params['bdaddr'] = stored_scan['bdaddrs'][target]
     params['name'] = stored_scan['names'][target]
+    return 1
 
 # -----------------------------------------------------------------------------
 
@@ -88,7 +95,8 @@ def change_target():
     for i in range(len(stored_scan['bdaddrs'])):
         print('\t{}. NAME: {} | ADDR: {}'.format(i, stored_scan['names'][i],
               stored_scan['bdaddrs'][i]))
-    choose_target()
+    if choose_target():
+        print("[*] Changed target to {}.".format(params['name']))
 
 # -----------------------------------------------------------------------------
 
@@ -111,8 +119,8 @@ def scan():
         print('\t{}. NAME: {} | ADDR: {}'.format(index, name, bdaddr))
         index += 1
     
-    choose_target()
-    print("Everything set up!")
+    if choose_target():
+        print("Everything set up!")
 
 # -----------------------------------------------------------------------------
 
@@ -122,6 +130,7 @@ settings_report()
 """
 
 def settings_report():
+
     print("[*] Settings: \n\t\
         BDADDR: {}\n\t\
         NAME: {}\n\t\
@@ -137,6 +146,7 @@ run()
 """
 
 def run():
+
     if not (params['bdaddr']):
         print("[!] Missing parameters! Run scan or set them manually.")
         return
@@ -166,6 +176,7 @@ set_params(comm)
 """
 
 def set_params():
+
     print('[*] Parameters: bdaddr, name, packet_sz, interface')
     param, value = input("[*] Insert '<param> <value>':").split(' ')
     params[param] = value
@@ -173,11 +184,12 @@ def set_params():
 # -----------------------------------------------------------------------------
 
 """
-config_parser()
+setparser()
     Adds all the commands to a command parser
 """
 
-def config_parser():
+def setparser():
+
     parser = CommandParser(description='Bpong v0.1')
     
     parser.add_command(name='scan', aliases=['s'], on_call=scan,
@@ -198,7 +210,8 @@ def config_parser():
 # -----------------------------------------------------------------------------
 
 def main():
-    parser = config_parser()
+
+    parser = setparser()
 
     while True:
         comm = input('bpong> ')
