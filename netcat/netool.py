@@ -179,7 +179,7 @@ def client_handler(client_socket):
 
 # -----------------------------------------------------------------------------
 
-# Inicializando o parser
+# Setting up the parser
 parser = setparser()
 state = parser.parse_args()
 
