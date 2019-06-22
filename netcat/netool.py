@@ -1,3 +1,12 @@
+#!/usr/bin/python
+
+# Netool - Simple netcat-ish script
+# Author: Franco Barpp Gomes (https://github.com/Hyodar)
+
+# -*- coding: utf-8 -*-
+
+# Imported modules
+# -----------------------------------------------------------------------------
 
 import sys
 import socket
@@ -5,9 +14,12 @@ import argparse
 import threading
 import subprocess
 
+# Functions
+# -----------------------------------------------------------------------------
+
 """
 setparser()
-   Inicializa o parser usado para a coleta de argumentos
+   Sets an argparser to receive argument data
 """
 
 def setparser():
@@ -30,11 +42,11 @@ def setparser():
 
         return parser
 
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 """
 client_sender(str buffer)
-   Envia os dados coletados do stdin pela rede
+   Sends stdin data
 """
 
 def client_sender(buffer):
@@ -73,11 +85,11 @@ def client_sender(buffer):
 
         client_socket.close()
 
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 """
 server_loop()
-   Cria um server pra receber requisicoes
+   Creates a server to receive requisitions
 """
 
 def server_loop():
@@ -97,11 +109,11 @@ def server_loop():
         client_thread.start()
 
     
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
   
 """
 run_command(str comm)
-   Roda o comando recebido no os local
+   Runs the received command on client shell
 """
 
 def run_command(comm):
@@ -117,12 +129,12 @@ def run_command(comm):
 
     return output
     
-# ---------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
   
 """
 client_handler(socket client_socket)
-   Lida com as acoes escolhidas pelo usuario - upload, execute e command
+   Handles user actions
 """
 
 def client_handler(client_socket):
@@ -164,12 +176,15 @@ def client_handler(client_socket):
 
             resp = run_command(cmd_buf)
             client_socket.send(resp)
-# ---------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
 
 # Inicializando o parser
 parser = setparser()
 state = parser.parse_args()
+
+# Main
+# -----------------------------------------------------------------------------
 
 def main():
     global state

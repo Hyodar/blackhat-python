@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 # Bpong - Bluetooth Ping Flooding Utility v0.1
 # Author: Franco Barpp Gomes (https://github.com/Hyodar)

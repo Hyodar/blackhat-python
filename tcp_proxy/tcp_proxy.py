@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 # Simple TCP Proxy
 # Author: Franco Barpp Gomes (https://github.com/Hyodar)
@@ -113,7 +114,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first, timeou
 """
 hexdump(src: bytes, length:int)
     Dumps the src as hex in a pretty way
-    source: http://code.activestate.com/recipes/142812-hex-dumper/ comments
+    source: http://code.activestate.com/recipes/142812-hex-dumper/ (comments)
 """
 
 def hexdump(src, length=10):
@@ -207,7 +208,6 @@ def setparser():
                             help='connection timeout (default 2s)')
 
         return parser
-
 
 # -----------------------------------------------------------------------------
 # Main
