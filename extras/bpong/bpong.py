@@ -20,6 +20,7 @@ from os import system
 # -----------------------------------------------------------------------------
 
 SCAN_DURATION = 15 #s
+FLOOD_DELAY = 0.1 #s
 
 # Globals
 # -----------------------------------------------------------------------------
@@ -185,7 +186,7 @@ def run():
             subprocess.Popen(xterm_1, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, shell=True)
 
-            sleep(3)
+            sleep(FLOOD_DELAY)
     except (KeyboardInterrupt, OSError):
         print("[!] Exception! Exiting...")
 
