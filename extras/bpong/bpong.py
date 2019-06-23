@@ -14,6 +14,12 @@
 import bluetooth as bt
 import subprocess
 from time import sleep
+from os import system
+
+# Constants
+# -----------------------------------------------------------------------------
+
+SCAN_DURATION = 15 #s
 
 # Globals
 # -----------------------------------------------------------------------------
@@ -43,6 +49,9 @@ class CommandParser:
                          help='Exits the script')
         self.add_command(name='help', aliases=['h'], on_call=self.help,
                          help='Prints help info')
+        self.add_command(name='clear', aliases=['cls'],
+                         on_call=lambda:system('clear'),
+                         help='Clears terminal screen')    
 
     def add_command(self, name, aliases, on_call, help):
         self.commands.append({
@@ -75,6 +84,7 @@ choose_target()
 """
 
 def choose_target():
+
     if not stored_scan['bdaddrs']:
         print("[!] No nearby devices found! Try again.")
         return 0
@@ -108,7 +118,17 @@ scan()
 
 def scan():
 
-    devices = bt.discover_devices(lookup_names=True)
+    devices = bt.discover_devices(lookup_names=True, duration=SCAN_DURATION)
+    
+    while not devices:
+        print("[*] Searching...")
+        
+        try:
+            scan()
+        except KeyboardInterrupt:
+            print("[!] Stopping scan...")
+            return
+    
     stored_scan['bdaddrs'] = []
     stored_scan['names'] = []
 
@@ -121,7 +141,8 @@ def scan():
         index += 1
     
     if choose_target():
-        print("Everything set up!")
+        print("[*] Target name: {}".format(params['name']))
+        print("[*] Everything set up!")
 
 # -----------------------------------------------------------------------------
 
@@ -133,10 +154,10 @@ settings_report()
 def settings_report():
 
     print("[*] Settings: \n\t\
-        BDADDR: {}\n\t\
-        NAME: {}\n\t\
-        PACKET SIZE: {}\n\t \
-        INTERFACE:{}".format(params['bdaddr'], params['name'],
+        * BDADDR: {}\n\t\
+        * NAME: {}\n\t\
+        * PACKET SIZE: {}\n\t\
+        * INTERFACE: {}".format(params['bdaddr'], params['name'],
                              params['packet_sz'], params['interface']))
 
 # -----------------------------------------------------------------------------
@@ -160,6 +181,7 @@ def run():
             xterm_1 = 'l2ping -i {} -s {} -f {} &'.format(params['interface'],
                                                           params['packet_sz'],
                                                           params['bdaddr'])
+            print("[*] Sending packet no {}...".format(i))
             subprocess.Popen(xterm_1, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, shell=True)
 
@@ -178,10 +200,14 @@ set_params(comm)
 
 def set_params():
 
-    print('[*] Parameters: bdaddr, name, packet_sz, interface')
+    print("[*] Parameters: bdaddr, name, packet_sz, interface")
     param, value = input("[*] Insert '<param> <value>':").split(' ')
-    params[param] = value
 
+    if param in params.keys():
+        params[param] = value
+        print("[*] Parameter '{}' set to '{}'!".format(param, value))
+    else:
+        print("[!] Parameter '{}' does not exist.".format(param))
 # -----------------------------------------------------------------------------
 
 """
